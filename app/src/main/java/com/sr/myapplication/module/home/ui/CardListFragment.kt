@@ -45,27 +45,25 @@ class CardListFragment : Fragment() {
         val mViewModel = CardsListViewModel()
         binding.viewModel = mViewModel
 
-        CoroutineScope(Dispatchers.IO).launch {
-            callApi(mViewModel)
-            withContext(Dispatchers.Main) {
-            observeViewModel(mViewModel)
-            }
-        }
+        //invoke service
+        fetchList(mViewModel)
+        //observe data
+        observeData(mViewModel)
     }
 
-    private fun callApi(mViewModel: CardsListViewModel) {
+    private fun fetchList(mViewModel: CardsListViewModel) {
         // fetch list to be displayed
         mViewModel.fetchList()
     }
 
-    private fun observeViewModel(mViewModel: CardsListViewModel) {
+    private fun observeData(mViewModel: CardsListViewModel) {
         // Update the list when the data changes
         mViewModel.getListObservable()
-            ?.observe(viewLifecycleOwner, Observer { data: DataRepoModel? ->
+            .observe(viewLifecycleOwner, { data: DataRepoModel? ->
                 if (data?.dataModel != null) {
 
                     // set list to recycler view adapter
-                    adapter!!.setList(data.dataModel)
+                    adapter?.setList(data.dataModel)
 
                     // dismiss progress
                     mViewModel.isLoading.set(false)
@@ -76,7 +74,7 @@ class CardListFragment : Fragment() {
                     if (data?.throwable != null && !TextUtils.isEmpty(data.throwable!!.message)) {
                         Toast.makeText(
                             activity,
-                            data.throwable!!.message,
+                            data.throwable?.message,
                             Toast.LENGTH_SHORT
                         ).show()
                     }

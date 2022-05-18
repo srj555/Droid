@@ -25,7 +25,7 @@ class CardsListViewModel : ViewModel() {
         listObservable = repository?.list!!
     }
 
-    fun getListObservable(): LiveData<DataRepoModel?>? {
+    fun getListObservable(): LiveData<DataRepoModel?> {
         return listObservable
     }
 }
