@@ -16,10 +16,12 @@ import org.junit.runner.RunWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import java.io.IOException
 
 
@@ -45,8 +47,14 @@ class CardsListViewModelTest {
             .baseUrl(mockWebServer?.url("").toString())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        service = retrofit!!.create(RetrofitAPIInterface::class.java)
-        viewModel = Mockito.mock(CardsListViewModel::class.java)
+        service = retrofit?.create(RetrofitAPIInterface::class.java)
+        viewModel = mock(CardsListViewModel::class.java)
+    }
+
+    private fun getJson(path: String): String {
+        val uri = this.javaClass.classLoader?.getResource(path)
+        val file = File(uri?.path ?: "")
+        return String(file.readBytes())
     }
 
     @Test
@@ -68,42 +76,7 @@ class CardsListViewModelTest {
     @Throws(IOException::class)
     fun testApiSuccess() {
         mockWebServer?.enqueue(
-            MockResponse().setBody(
-                "[\n" +
-                        "  {\n" +
-                        "    \"fairings\": {\n" +
-                        "      \"reused\": false,\n" +
-                        "      \"recovery_attempt\": false,\n" +
-                        "      \"recovered\": false,\n" +
-                        "      \"ships\": []\n" +
-                        "    },\n" +
-                        "    \"links\": {\n" +
-                        "      \"flickr\": {\n" +
-                        "        \"small\": [],\n" +
-                        "        \"original\": []\n" +
-                        "      },\n" +
-                        "      \"presskit\": null,\n" +
-                        "      \"webcast\": \"https://www.youtube.com/watch?v=0a_00nJ_Y88\",\n" +
-                        "      \"youtube_id\": \"0a_00nJ_Y88\",\n" +
-                        "      \"article\": \"https://www.space.com/2196-spacex-inaugural-falcon-1-rocket-lost-launch.html\",\n" +
-                        "      \"wikipedia\": \"https://en.wikipedia.org/wiki/DemoSat\"\n" +
-                        "    },\n" +
-                        "    \"static_fire_date_utc\": \"2006-03-17T00:00:00.000Z\",\n" +
-                        "    \"static_fire_date_unix\": 1142553600,\n" +
-                        "    \"crew\": [],\n" +
-                        "    \"ships\": [],\n" +
-                        "    \"capsules\": [],\n" +
-                        "    \"payloads\": [\n" +
-                        "      \"5eb0e4b5b6c3bb0006eeb1e1\"\n" +
-                        "    ],\n" +
-                        "    \"launchpad\": \"5e9e4502f5090995de566f86\",\n" +
-                        "    \"auto_update\": true,\n" +
-                        "    \"flight_number\": 1,\n" +
-                        "    \"name\": \"FalconSat\",\n" +
-                        "    \"upcoming\": false,\n" +
-                        "    \"id\": \"5eb87cd9ffd86e000604b32a\"\n" +
-                        "  }\n" +
-                        "]"
+            MockResponse().setBody(getJson("spacex_getList.json")
             )
         )
         val call= service!!.retrieveList()
