@@ -49,6 +49,7 @@ class CardsListViewModelTest {
             .build()
         service = retrofit?.create(RetrofitAPIInterface::class.java)
         viewModel = mock(CardsListViewModel::class.java)
+        repository = mock(DataRepository::class.java)
     }
 
     private fun getJson(path: String): String {
@@ -65,11 +66,12 @@ class CardsListViewModelTest {
         data.postValue(dataRepoModel)
 
         //Setting how up the mock behaves
+        Mockito.doReturn(data).`when`(repository)?.list
         Mockito.doReturn(data).`when`(viewModel)?.getListObservable()
-        //
-        repository!!.list
-        Mockito.verify(repository)?.list
-        Assert.assertEquals(data, viewModel!!.getListObservable())
+        // fetchList
+        viewModel?.fetchList()
+
+        Assert.assertEquals(data, viewModel?.getListObservable())
     }
 
     @Test
