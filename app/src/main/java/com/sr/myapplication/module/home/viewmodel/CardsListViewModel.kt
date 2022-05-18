@@ -25,12 +25,12 @@ class CardsListViewModel : BaseViewModel() {
     fun fetchList() {
         isLoading.set(true)
         AppController.appComponent?.inject(this)
-        val listObservable = repository?.list!!
+        val listObservable = repository?.getList()
         compositeDisposable.add(listObservable
-            .subscribeOn(Schedulers.io())
-            .map {it}
-            .observeOn(mainThread())
-            .subscribe(
+            ?.subscribeOn(Schedulers.io())
+            ?.map {it}
+            ?.observeOn(mainThread())
+            ?.subscribe(
                 { data ->
 
                     // Update live data
@@ -39,7 +39,7 @@ class CardsListViewModel : BaseViewModel() {
                 },
                 { throwable ->
                     // Update live data
-                    var response = DataRepoModel()
+                    val response = DataRepoModel()
                     response.throwable = throwable
                     listLiveData.value = response
                     isLoading.set(false)

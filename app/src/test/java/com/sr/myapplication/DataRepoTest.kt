@@ -44,9 +44,9 @@ class DataRepoTest {
             data.value = dataRepoModel
 
             //Setting how up the mock behaves
-            Mockito.doReturn(data).`when`(dataRepository)?.list
+            Mockito.doReturn(data).`when`(dataRepository)?.getList()
             webService!!.retrieveList()
             Mockito.verify(webService)?.retrieveList()
-            Assert.assertEquals(data, dataRepository?.list)
+            Assert.assertEquals(data, dataRepository?.getList())
         }
 }
