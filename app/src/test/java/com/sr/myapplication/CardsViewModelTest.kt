@@ -66,12 +66,11 @@ class CardsListViewModelTest {
         data.postValue(dataRepoModel)
 
         //Setting how up the mock behaves
-        Mockito.doReturn(data).`when`(repository)?.list
-        Mockito.doReturn(data).`when`(viewModel)?.getListObservable()
+        Mockito.doReturn(data).`when`(viewModel)?.getListLiveData()
         // fetchList
         viewModel?.fetchList()
 
-        Assert.assertEquals(data, viewModel?.getListObservable())
+        Assert.assertEquals(data, viewModel?.getListLiveData())
     }
 
     @Test
