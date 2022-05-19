@@ -6,6 +6,7 @@ import com.sr.myapplication.module.home.model.DataModel
 import com.sr.myapplication.module.home.model.DataRepoModel
 import com.sr.myapplication.core.network.DataRepository
 import com.sr.myapplication.core.network.RetrofitAPIInterface
+import io.reactivex.rxjava3.core.Observable
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -38,15 +39,23 @@ class DataRepoTest {
     //Setting how up the mock behaves
     @Test
     fun getList(){
-            val data = MutableLiveData<DataRepoModel>()
             val dataModel = arrayListOf(Mockito.spy(DataModel::class.java))
             val dataRepoModel = DataRepoModel(dataModel)
-            data.value = dataRepoModel
+            val data = getListMock(dataRepoModel)
 
             //Setting how up the mock behaves
             Mockito.doReturn(data).`when`(dataRepository)?.getList()
-            webService!!.retrieveList()
+            webService?.retrieveList()
             Mockito.verify(webService)?.retrieveList()
             Assert.assertEquals(data, dataRepository?.getList())
         }
+
+    fun getListMock(dataRepoModel:DataRepoModel): Observable<DataRepoModel> {
+        return (Observable.defer {
+            Observable.create<DataRepoModel> { emitter ->
+                emitter.onNext(dataRepoModel)
+                emitter.onComplete()
+            }
+        } as? Observable<DataRepoModel>?)!!
+    }
 }
