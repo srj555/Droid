@@ -1,5 +1,6 @@
 package com.sr.myapplication.module.home.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -10,18 +11,21 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sr.myapplication.R
+import com.sr.myapplication.core.app.ApiConstants.BUNDLE_KEY_DATA_MODEL
 import com.sr.myapplication.module.home.adapter.CardListAdapter
 import com.sr.myapplication.databinding.FragmentListCardBinding
+import com.sr.myapplication.module.detail.ui.CardsDetailActivity
 import com.sr.myapplication.module.home.model.DataRepoModel
 import com.sr.myapplication.module.home.viewmodel.CardsListViewModel
 
 class CardListFragment : Fragment() {
     private lateinit var binding: FragmentListCardBinding
     private var adapter: CardListAdapter? = null
+    private lateinit var mViewModel: CardsListViewModel
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_list_card, container, false)
         return binding.root
     }
@@ -34,13 +38,21 @@ class CardListFragment : Fragment() {
 
     private fun setAdapter() {
         adapter = CardListAdapter()
+        adapter?.listener = {
+            val intent = Intent(this.activity, CardsDetailActivity::class.java)
+            intent.putExtra(
+                BUNDLE_KEY_DATA_MODEL,
+                mViewModel.getListLiveData().value?.dataModel?.get(it)
+            )
+            this.activity?.startActivity(intent)
+        }
         binding.itemList.adapter = adapter
         binding.itemList.layoutManager = LinearLayoutManager(activity)
     }
 
 
     private fun initBinding() {
-        val mViewModel = CardsListViewModel()
+        mViewModel = CardsListViewModel()
         binding.viewModel = mViewModel
 
         //invoke service
