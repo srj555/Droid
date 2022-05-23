@@ -4,9 +4,13 @@ import androidx.databinding.ObservableBoolean
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.sr.myapplication.core.app.AppController
+import com.sr.myapplication.core.base.BaseViewModel
+import com.sr.myapplication.module.home.model.DataRepoModel
 import com.sr.myapplication.core.base.BaseSchedulerProvider
 import com.sr.myapplication.core.base.BaseViewModel
 import com.sr.myapplication.core.network.DataRepository
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread
+import io.reactivex.rxjava3.schedulers.Schedulers
 import com.sr.myapplication.module.home.model.DataRepoModel
 import javax.inject.Inject
 
