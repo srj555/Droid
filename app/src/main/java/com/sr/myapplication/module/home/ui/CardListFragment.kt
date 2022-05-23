@@ -9,12 +9,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sr.myapplication.R
 import com.sr.myapplication.core.app.ApiConstants.BUNDLE_KEY_DATA_MODEL
-import com.sr.myapplication.module.home.adapter.CardListAdapter
+import com.sr.myapplication.core.base.SchedulerProvider
 import com.sr.myapplication.databinding.FragmentListCardBinding
 import com.sr.myapplication.module.detail.ui.CardsDetailActivity
+import com.sr.myapplication.module.home.adapter.CardListAdapter
 import com.sr.myapplication.module.home.model.DataRepoModel
 import com.sr.myapplication.module.home.viewmodel.CardsListViewModel
 
@@ -52,7 +54,9 @@ class CardListFragment : Fragment() {
 
 
     private fun initBinding() {
-        mViewModel = CardsListViewModel()
+        // init view Model
+        mViewModel = ViewModelProvider(this)[CardsListViewModel::class.java]
+        mViewModel.init(SchedulerProvider())
         binding.viewModel = mViewModel
 
         //invoke service
