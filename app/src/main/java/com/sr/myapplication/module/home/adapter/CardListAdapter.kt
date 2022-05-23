@@ -8,7 +8,9 @@ import com.sr.myapplication.R
 import com.sr.myapplication.databinding.ItemListContentBinding
 import com.sr.myapplication.module.home.model.DataModel
 
-class CardListAdapter :
+class CardListAdapter(
+    var listener: (position: Int) -> Unit = {}
+) :
     RecyclerView.Adapter<CardListAdapter.ViewHolder>() {
     private var mValues: List<DataModel?>? = null
     fun setList(list: ArrayList<DataModel?>) {
@@ -25,7 +27,13 @@ class CardListAdapter :
                 LayoutInflater.from(parent.context), R.layout.item_list_content,
                 parent, false
             )
-        return ViewHolder(binding)
+        val viewHolder = ViewHolder(binding)
+        // Click listener
+        viewHolder.binding.cardView.setOnClickListener {
+            listener(viewHolder.adapterPosition)
+        }
+
+        return viewHolder
     }
 
     override fun onBindViewHolder(
@@ -42,4 +50,5 @@ class CardListAdapter :
 
     inner class ViewHolder(val binding: ItemListContentBinding) :
         RecyclerView.ViewHolder(binding.root)
+
 }

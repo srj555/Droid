@@ -1,19 +1,20 @@
-package com.sr.myapplication
+package com.sr.myapplication.module.home.viewmodel
 
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
-import com.sr.myapplication.module.home.model.DataModel
-import com.sr.myapplication.module.home.model.DataRepoModel
+import com.sr.myapplication.core.base.BaseSchedulerProvider
+import com.sr.myapplication.core.base.TrampolineSchedulerProvider
 import com.sr.myapplication.core.network.DataRepository
 import com.sr.myapplication.core.network.RetrofitAPIInterface
-import com.sr.myapplication.module.home.viewmodel.CardsListViewModel
+import com.sr.myapplication.module.home.model.DataModel
+import com.sr.myapplication.module.home.model.DataRepoModel
+import io.reactivex.rxjava3.core.Observable
 import junit.framework.Assert.assertEquals
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.*
 import org.junit.runner.RunWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
@@ -27,8 +28,8 @@ import java.io.IOException
 
 @RunWith(MockitoJUnitRunner::class)
 class CardsListViewModelTest {
-    @InjectMocks
-    var viewModel: CardsListViewModel? = null
+    private lateinit var viewModel: CardsListViewModel
+    private lateinit var scheduler: BaseSchedulerProvider
 
     @Mock
     var repository: DataRepository? = null
@@ -39,6 +40,7 @@ class CardsListViewModelTest {
     var retrofit: Retrofit? = null
     var service: RetrofitAPIInterface? = null
 
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -48,8 +50,12 @@ class CardsListViewModelTest {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         service = retrofit?.create(RetrofitAPIInterface::class.java)
-        viewModel = mock(CardsListViewModel::class.java)
+        scheduler = TrampolineSchedulerProvider()
+
+        viewModel = CardsListViewModel()
+        viewModel.init(scheduler)
         repository = mock(DataRepository::class.java)
+        viewModel.repository = this.repository
     }
 
     private fun getJson(path: String): String {
@@ -59,29 +65,63 @@ class CardsListViewModelTest {
     }
 
     @Test
-    fun fetchList() {
+    fun fetchListPositive() {
         val dataModel = arrayListOf(Mockito.spy(DataModel::class.java))
         val dataRepoModel = DataRepoModel(dataModel)
-        val data = MutableLiveData<DataRepoModel>()
-        data.postValue(dataRepoModel)
+        val data = getListMock(dataRepoModel)
+        val liveData = MutableLiveData<DataRepoModel>()
+        liveData.postValue(dataRepoModel)
 
         //Setting how up the mock behaves
-        Mockito.doReturn(data).`when`(repository)?.list
-        Mockito.doReturn(data).`when`(viewModel)?.getListObservable()
-        // fetchList
-        viewModel?.fetchList()
+        Mockito.doReturn(data).`when`(repository)?.getList()
 
-        Assert.assertEquals(data, viewModel?.getListObservable())
+        viewModel.fetchList()
+
+        Assert.assertEquals(liveData.value, viewModel.getListLiveData().value)
+    }
+
+
+    @Test
+    fun fetchListNegative() {
+        val dataModel = arrayListOf(Mockito.spy(DataModel::class.java))
+        val dataRepoModel = DataRepoModel(dataModel)
+        val data = getListMockNegative(dataRepoModel)
+        val liveData = MutableLiveData<DataRepoModel>()
+        liveData.postValue(dataRepoModel)
+        //Setting how up the mock behaves
+        Mockito.doReturn(data).`when`(repository)?.getList()
+
+        viewModel.fetchList()
+        Assert.assertNotNull(viewModel.getListLiveData().value?.throwable)
+    }
+
+    private fun getListMock(dataRepoModel: DataRepoModel): Observable<DataRepoModel> {
+        return (Observable.defer {
+            Observable.create<DataRepoModel> { emitter ->
+                emitter.onNext(dataRepoModel)
+                emitter.onComplete()
+            }
+        } as? Observable<DataRepoModel>?)!!
+    }
+
+    private fun getListMockNegative(dataRepoModel: DataRepoModel): Observable<DataRepoModel> {
+        return (Observable.defer {
+            Observable.create<DataRepoModel> { emitter ->
+                emitter.onError(Throwable())
+                emitter.onComplete()
+            }
+        } as? Observable<DataRepoModel>?)!!
     }
 
     @Test
     @Throws(IOException::class)
     fun testApiSuccess() {
         mockWebServer?.enqueue(
-            MockResponse().setBody(getJson("spacex_getList.json")
+            MockResponse().setBody(
+                getJson("spacex_getList.json")
             )
         )
-        val call= service!!.retrieveList()
+        val call = service!!.retrieveList()
         val dataModel = call!!.execute()
         Assert.assertNotNull(dataModel)
         assertEquals("FalconSat", dataModel.body()?.get(0)?.name)
@@ -95,7 +135,7 @@ class CardsListViewModelTest {
                 .setResponseCode(404)
                 .setBody("[]")
         )
-        val call= service!!.retrieveList()
+        val call = service!!.retrieveList()
         val dataModel = call!!.execute()
         Assert.assertNull(dataModel.body())
     }

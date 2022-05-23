@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -32,6 +33,10 @@ android {
     }
     dataBinding {
         enabled = true
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 }
 
@@ -76,6 +81,9 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
     // ktx
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
+
+    //rxKotlin
+    implementation("io.reactivex.rxjava2:rxkotlin:2.0.0")
 
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     // Because RxAndroid releases are few and far between, it is recommended you also
