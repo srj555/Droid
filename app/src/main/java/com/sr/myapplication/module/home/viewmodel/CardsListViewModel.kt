@@ -22,8 +22,11 @@ class CardsListViewModel : BaseViewModel() {
 
     private lateinit var schedulers: BaseSchedulerProvider
 
-    fun init(schedulerProvider: BaseSchedulerProvider) {
+    init {
         AppController.appComponent?.inject(this)
+    }
+    fun init(schedulerProvider: BaseSchedulerProvider) {
+
         schedulers = schedulerProvider
     }
 

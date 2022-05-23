@@ -14,10 +14,14 @@ class DataRepository {
     @Inject
     var webService: RetrofitAPIInterface? = null
 
+    init {
+        AppController.appComponent?.inject(this)
+    }
+
     fun getList(): Observable<DataRepoModel> {
         return (Observable.defer {
             Observable.create<DataRepoModel> { emitter ->
-                AppController.appComponent?.inject(this)
+
                 val call = webService?.retrieveList()
                 call!!.enqueue(object : Callback<ArrayList<DataModel?>> {
                     override fun onResponse(
